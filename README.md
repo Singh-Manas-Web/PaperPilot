@@ -29,8 +29,8 @@ Downloaded with the free [arXiv API](https://info.arxiv.org/help/api/index.html)
 ## Setup
 
 ```bash
-git clone https://github.com/<your-username>/paperpilot.git
-cd paperpilot
+git clone https://github.com/Singh-Manas-Web/PaperPilot.git
+cd PaperPilot
 python -m venv .venv
 # Windows: .venv\Scripts\activate      macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
