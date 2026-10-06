@@ -39,9 +39,14 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python scripts/download_arxiv.py          # -> data/raw/arxiv_abstracts.csv (~1 min)
-python -m classic_nlp.preprocess          # -> data/processed/abstracts_clean.csv
-pytest                                    # run the tests
+python scripts/download_arxiv.py                       # -> data/raw/arxiv_abstracts.csv (~1 min)
+python -m classic_nlp.preprocess                       # -> data/processed/abstracts_clean.csv
+python -m classic_nlp.search build                     # TF-IDF index + data/processed/keywords.csv
+python -m classic_nlp.search query "lattice encryption"
+python -m classic_nlp.search keywords 0                # top keywords of one paper
+python -m classic_nlp.embeddings train                 # Word2Vec (Skip-gram) on the abstracts
+python -m classic_nlp.embeddings similar encryption    # nearest words
+pytest -v                                              # run the tests
 ```
 
 ## Text preprocessing pipeline
@@ -54,14 +59,24 @@ pytest                                    # run the tests
 4. POS-tag, then lemmatize with WordNet using the tag (or stem with Snowball/Porter via `--method`)
 5. Remove English stopwords plus research boilerplate words ("paper", "propose", "method"), but **keep negations** ("not", "no")
 
+## Keyword search (TF-IDF)
+
+`classic_nlp/search.py` turns every cleaned abstract into a TF-IDF vector (unigrams + bigrams, `sublinear_tf`, terms in 2+ papers and under 80% of papers). A query is cleaned with the same pipeline, vectorized, and papers are ranked by cosine similarity. The same TF-IDF weights give each paper's top 10 keywords.
+
+## Similar terms (Word2Vec)
+
+`classic_nlp/embeddings.py` trains a Skip-gram Word2Vec model (100 dimensions, window 5) on the cleaned abstracts with Gensim, so you can look up words used in similar contexts, e.g. `similar encryption`.
+
 ## Project structure
 
 ```
 paperpilot/
-├── classic_nlp/       # Week 1: preprocessing, search, classifiers
+├── classic_nlp/       # Week 1: preprocessing, TF-IDF search, Word2Vec, classifiers
 ├── scripts/           # data download
 ├── tests/             # pytest tests
+├── pytest.ini
 ├── data/              # gitignored: raw and processed data
+├── models/            # gitignored: saved TF-IDF and Word2Vec models
 ├── requirements.txt
 └── PROGRESS.md        # daily log
 ```
