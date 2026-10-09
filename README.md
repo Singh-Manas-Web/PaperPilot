@@ -46,6 +46,8 @@ python -m classic_nlp.search query "lattice encryption"
 python -m classic_nlp.search keywords 0                # top keywords of one paper
 python -m classic_nlp.embeddings train                 # Word2Vec (Skip-gram) on the abstracts
 python -m classic_nlp.embeddings similar encryption    # nearest words
+python -m classic_nlp.baseline train                   # category classifiers -> results.md
+python -m classic_nlp.baseline predict "your abstract text"
 pytest -v                                              # run the tests
 ```
 
@@ -67,6 +69,14 @@ pytest -v                                              # run the tests
 
 `classic_nlp/embeddings.py` trains a Skip-gram Word2Vec model (100 dimensions, window 5) on the cleaned abstracts with Gensim, so you can look up words used in similar contexts, e.g. `similar encryption`.
 
+## Category classification
+
+Predicts a paper's arXiv category (cs.CL / cs.CR / cs.CV / cs.LG) from its cleaned abstract.
+
+- `classic_nlp/dataset.py` creates **one stratified 80/20 train/test split** (seed 42), saved to `data/processed/split.csv`, so every model in this project is evaluated on the same papers.
+- `classic_nlp/baseline.py` compares a majority-class dummy, TF-IDF + Naive Bayes and TF-IDF + Logistic Regression (`class_weight="balanced"`), using 5-fold cross-validation on the training set and macro-F1 on the test set.
+- `classic_nlp/results.py` records every model's scores in `results/metrics.json` and renders **[results.md](results.md)**.
+
 ## Project structure
 
 ```
@@ -78,5 +88,7 @@ paperpilot/
 ├── data/              # gitignored: raw and processed data
 ├── models/            # gitignored: saved TF-IDF and Word2Vec models
 ├── requirements.txt
+├── results/           # metrics.json (all model scores)
+├── results.md         # results table
 └── PROGRESS.md        # daily log
 ```
