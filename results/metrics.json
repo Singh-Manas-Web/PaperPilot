@@ -1,0 +1,26 @@
+[
+  {
+    "model": "Majority class (dummy)",
+    "accuracy": 0.2703,
+    "macro_f1": 0.1064,
+    "cv_f1": 0.1064,
+    "date": "2026-10-09",
+    "notes": "Day 3 baseline"
+  },
+  {
+    "model": "TF-IDF + Naive Bayes",
+    "accuracy": 0.7568,
+    "macro_f1": 0.75,
+    "cv_f1": 0.7339,
+    "date": "2026-10-09",
+    "notes": "Day 3 baseline"
+  },
+  {
+    "model": "TF-IDF + Logistic Regression",
+    "accuracy": 0.7946,
+    "macro_f1": 0.7941,
+    "cv_f1": 0.79,
+    "date": "2026-10-09",
+    "notes": "Day 3 baseline"
+  }
+]
