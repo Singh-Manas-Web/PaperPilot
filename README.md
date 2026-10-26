@@ -48,6 +48,8 @@ python -m classic_nlp.embeddings train                 # Word2Vec (Skip-gram) on
 python -m classic_nlp.embeddings similar encryption    # nearest words
 python -m classic_nlp.baseline train                   # category classifiers -> results.md
 python -m classic_nlp.baseline predict "your abstract text"
+python -m classic_nlp.ann train                        # neural network (Keras) -> results.md
+python -m classic_nlp.ann predict "your abstract text"
 pytest -v                                              # run the tests
 ```
 
@@ -74,7 +76,9 @@ pytest -v                                              # run the tests
 Predicts a paper's arXiv category (cs.CL / cs.CR / cs.CV / cs.LG) from its cleaned abstract.
 
 - `classic_nlp/dataset.py` creates **one stratified 80/20 train/test split** (seed 42), saved to `data/processed/split.csv`, so every model in this project is evaluated on the same papers.
-- `classic_nlp/baseline.py` compares a majority-class dummy, TF-IDF + Naive Bayes and TF-IDF + Logistic Regression (`class_weight="balanced"`), using 5-fold cross-validation on the training set and macro-F1 on the test set.
+- `classic_nlp/baseline.py` compares a majority-class dummy, TF-IDF + Naive Bayes and TF-IDF + Logistic Regression 
+- `classic_nlp/ann.py` trains a neural network with Keras: TF-IDF → Dense(128, ReLU) → Dropout(0.5) → Dense(4, softmax), with early stopping on a stratified validation set carved from the training papers. It reached 100% training accuracy but tied logistic regression on the test set (macro-F1 0.790 vs 0.794), making the same cs.CL/cs.LG mistakes. The limit is the bag-of-words features and the cross-listed labels, not model size.
+(`class_weight="balanced"`), using 5-fold cross-validation on the training set and macro-F1 on the test set.
 - `classic_nlp/results.py` records every model's scores in `results/metrics.json` and renders **[results.md](results.md)**.
 
 ## Project structure
@@ -86,8 +90,7 @@ paperpilot/
 ├── tests/             # pytest tests
 ├── pytest.ini
 ├── data/              # gitignored: raw and processed data
-├── models/            # gitignored: saved TF-IDF and Word2Vec models
-├── requirements.txt
+├── models/            # gitignored: saved TF-IDF, Word2Vec and classifier models├── requirements.txt
 ├── results/           # metrics.json (all model scores)
 ├── results.md         # results table
 └── PROGRESS.md        # daily log
