@@ -22,5 +22,13 @@
     "cv_f1": 0.79,
     "date": "2026-10-09",
     "notes": "Day 3 baseline"
+  },
+  {
+    "model": "TF-IDF + ANN (Dense 128, dropout 0.5)",
+    "accuracy": 0.7919,
+    "macro_f1": 0.7902,
+    "cv_f1": null,
+    "date": "2026-10-26",
+    "notes": "Day 4; best epoch 11"
   }
 ]
