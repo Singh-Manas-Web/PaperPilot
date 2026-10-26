@@ -14,8 +14,7 @@ RESULTS_MD = ROOT / "results.md"
 
 
 def load(path=RESULTS_JSON):
-    return json.loads(Path(path).read_text()) if Path(path).exists() else []
-
+    return json.loads(Path(path).read_text(encoding="utf-8")) if Path(path).exists() else []
 
 def record(model, accuracy, macro_f1, cv_f1=None, notes="",
            json_path=RESULTS_JSON, md_path=RESULTS_MD):
@@ -25,8 +24,8 @@ def record(model, accuracy, macro_f1, cv_f1=None, notes="",
                  "cv_f1": None if cv_f1 is None else round(cv_f1, 4),
                  "date": date.today().isoformat(), "notes": notes})
     Path(json_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(json_path).write_text(json.dumps(rows, indent=2))
-    Path(md_path).write_text(render(rows))
+    Path(json_path).write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    Path(md_path).write_text(render(rows), encoding="utf-8")    
     return rows
 
 
