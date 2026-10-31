@@ -50,6 +50,9 @@ python -m classic_nlp.baseline train                   # category classifiers ->
 python -m classic_nlp.baseline predict "your abstract text"
 python -m classic_nlp.ann train                        # neural network (Keras) -> results.md
 python -m classic_nlp.ann predict "your abstract text"
+python -m classic_nlp.rnn train --maxlen 50            # SimpleRNN on the first 50 words
+python -m classic_nlp.rnn predict "your abstract text"
+python -m classic_nlp.evaluate rnn                     # report for any saved model: lr | ann | rnn
 pytest -v                                              # run the tests
 ```
 
@@ -78,6 +81,9 @@ Predicts a paper's arXiv category (cs.CL / cs.CR / cs.CV / cs.LG) from its clean
 - `classic_nlp/dataset.py` creates **one stratified 80/20 train/test split** (seed 42), saved to `data/processed/split.csv`, so every model in this project is evaluated on the same papers.
 - `classic_nlp/baseline.py` compares a majority-class dummy, TF-IDF + Naive Bayes and TF-IDF + Logistic Regression 
 - `classic_nlp/ann.py` trains a neural network with Keras: TF-IDF → Dense(128, ReLU) → Dropout(0.5) → Dense(4, softmax), with early stopping on a stratified validation set carved from the training papers. It reached 100% training accuracy but tied logistic regression on the test set (macro-F1 0.790 vs 0.794), making the same cs.CL/cs.LG mistakes. The limit is the bag-of-words features and the cross-listed labels, not model size.
+- `classic_nlp/sequences.py` turns cleaned abstracts into fixed-length integer sequences: a vocabulary built from training papers only (words seen at least twice; 0 = padding, 1 = unknown word), padded at the front to 200 words.
+- `classic_nlp/rnn.py` trains Embedding(64) → SimpleRNN(64) → Dense(4, softmax). Reading up to 200 words, it scored at chance (macro-F1 0.256): gradients vanished before reaching the topic words at the start of each abstract, so it memorised the training set instead. Reading only the first 50 words (`--maxlen 50`) raised macro-F1 to 0.467, which supports that explanation, but it still trails logistic regression (0.794), because 1,258 papers are too few to learn word embeddings from scratch.
+- `classic_nlp/evaluate.py` prints the same per-category report and confusion matrix for any saved model (`lr`, `ann`, `rnn`), so every model is judged by identical code.
 (`class_weight="balanced"`), using 5-fold cross-validation on the training set and macro-F1 on the test set.
 - `classic_nlp/results.py` records every model's scores in `results/metrics.json` and renders **[results.md](results.md)**.
 
