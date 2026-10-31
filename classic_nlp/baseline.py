@@ -88,6 +88,9 @@ def train(cv_folds=5):
     joblib.dump(best, MODEL_FILE)
     print(f"\nSaved {MODEL_FILE.relative_to(ROOT)}; scores written to results.md")
 
+def predict_labels(texts):
+    """Category IDs for already-cleaned texts (used by classic_nlp.evaluate)."""
+    return joblib.load(MODEL_FILE).predict(texts)
 
 def predict(text):
     from classic_nlp.preprocess import preprocess        # imported here: loads NLTK only when needed

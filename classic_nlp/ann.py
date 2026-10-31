@@ -16,13 +16,13 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
 
 from classic_nlp import results
 from classic_nlp.baseline import tfidf
 from classic_nlp.dataset import LABELS, load_splits
+from classic_nlp.evaluate import report
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_FILE = ROOT / "models" / "ann.keras"
@@ -51,14 +51,6 @@ def build_model(n_features, hidden_units=128, dropout=0.5, n_classes=len(LABELS)
 def to_dense(vectorizer, texts):
     """Sparse TF-IDF matrix -> dense float32 array, which Keras Dense layers expect."""
     return vectorizer.transform(texts).toarray().astype("float32")
-
-
-def print_report(y_true, y_pred):
-    print(classification_report(y_true, y_pred, target_names=LABELS, digits=3))
-    print("Confusion matrix (rows = true category, columns = predicted):")
-    print("        " + "  ".join(f"{c:>6s}" for c in LABELS))
-    for label, row in zip(LABELS, confusion_matrix(y_true, y_pred, labels=range(len(LABELS)))):
-        print(f"{label:>6s}  " + "  ".join(f"{v:6d}" for v in row))
 
 
 def train(epochs=100, batch_size=32, patience=5, seed=42):
@@ -98,16 +90,24 @@ def train(epochs=100, batch_size=32, patience=5, seed=42):
 
     # The test set is used exactly once, here
     pred = model.predict(X_test, verbose=0).argmax(axis=1)
-    acc, f1 = accuracy_score(y_test, pred), f1_score(y_test, pred, average="macro")
+    acc, f1 = report(y_test, pred)
     results.record(MODEL_NAME, acc, f1, notes=f"Day 4; best epoch {best_epoch}")
-    print(f"\nTest accuracy {acc:.3f}   Test macro-F1 {f1:.3f}\n")
-    print_report(y_test, pred)
+    print(f"\nTest accuracy {acc:.3f}   Test macro-F1 {f1:.3f}")
 
     MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
     model.save(MODEL_FILE)
     joblib.dump(vectorizer, VECTORIZER_FILE)
     print(f"\nSaved {MODEL_FILE.relative_to(ROOT)} and {VECTORIZER_FILE.relative_to(ROOT)}; "
           "scores written to results.md")
+
+
+def predict_labels(texts):
+    """Category IDs for already-cleaned texts (used by classic_nlp.evaluate)."""
+    import keras
+
+    model = keras.models.load_model(MODEL_FILE)
+    vectorizer = joblib.load(VECTORIZER_FILE)
+    return model.predict(to_dense(vectorizer, texts), verbose=0).argmax(axis=1)
 
 
 def predict(text):
