@@ -30,5 +30,21 @@
     "cv_f1": null,
     "date": "2026-10-26",
     "notes": "Day 4; best epoch 11"
+  },
+  {
+    "model": "Embedding + SimpleRNN (64 units)",
+    "accuracy": 0.2676,
+    "macro_f1": 0.2563,
+    "cv_f1": null,
+    "date": "2026-10-31",
+    "notes": "Day 5; best epoch 1"
+  },
+  {
+    "model": "Embedding + SimpleRNN (64 units, first 50 words)",
+    "accuracy": 0.4811,
+    "macro_f1": 0.467,
+    "cv_f1": null,
+    "date": "2026-10-31",
+    "notes": "Day 5; best epoch 4"
   }
 ]
